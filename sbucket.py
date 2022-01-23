@@ -124,17 +124,21 @@ def main():
     probes = getProbes(probes, country_codes=args.country)
     if args.verbose >= 1:
         print("received {} probes.".format(len(probes)))
+    # Build dictionary to look up probe coordinates by ID.
+    probes_by_id = {p['id']: p for p in probes}
 
     buckets = bucketing(probes, args.count, projection=args.projection, max_iter=args.maxiter)
-    probes = list(random_selection(buckets))
+    probe_ids = list(random_selection(buckets))
 
     if args.verbose >= 1:
-        print("selected {} probes:".format(len(probes)))
+        print("selected {} probes:".format(len(probe_ids)))
 
-    print(probes)
+    print(probe_ids)
 
     if args.verbose >= 1:
-        print('count:', len(probes))
+        print('count:', len(probe_ids))
+        for id in probe_ids:
+            print(json.dumps(probes_by_id[id]))
 
     if args.verbose >= 2:
         print()
@@ -150,9 +154,9 @@ def main():
                 "resolve_on_probe": False,
                 "type": "ping"}],
             "probes": [{
-                "value": ",".join(map(str, probes)),
+                "value": ",".join(map(str, probe_ids)),
                 "type": "probes",
-                "requested": len(probes)}],
+                "requested": len(probe_ids)}],
             "is_oneoff": True})+"'", "https://atlas.ripe.net/api/v1/measurement/?key=INSERT_KEY_HERE")
 
 
